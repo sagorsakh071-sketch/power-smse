@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Power SMS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="/public/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+<div class="ov" id="ov" onclick="closeSb()"></div>
+<div class="tc" id="tc"></div>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tbl"><button class="tbtog" onclick="toggleSb()"><i class="bi bi-list"></i></button><div class="tbbrand">⚡ Power <em>SMS</em></div></div>
+    <div class="tbr">
+      <div class="upill"><div class="uav" id="hdav">?</div><div><div id="hdun" style="font-weight:600;font-size:12px;">User</div><div class="rbadge" id="hdrole">Agent</div></div></div>
+      <button class="lbtn" onclick="doLogout()"><i class="bi bi-box-arrow-right"></i></button>
+    </div>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sb">
+    <div class="sbu"><div class="sbav" id="sbav">?</div><div class="sbnm" id="sbnm">...</div><div class="sbrl" id="sbrl">Agent</div></div>
+
+    <!-- Common nav -->
+    <div class="nsec">
+      <div class="nlbl">Main</div>
+      <div class="ni active" id="ni-dash" onclick="go('dash')"><i class="bi bi-grid-1x2-fill"></i>Dashboard</div>
+    </div>
+
+    <!-- Admin nav -->
+    <div id="nav-admin" style="display:none;">
+      <div class="nsec">
+        <div class="nlbl">SMS Module</div>
+        <div class="ni" id="ni-ranges" onclick="go('ranges')"><i class="bi bi-collection-fill"></i>SMS Ranges</div>
+        <div class="ni" id="ni-anums" onclick="go('anums')"><i class="bi bi-telephone-fill"></i>SMS Numbers</div>
+        <div class="np" id="np-cdr" onclick="togM('cdr')"><div class="npl2"><i class="bi bi-graph-up-arrow"></i>CDR & Stats</div><i class="bi bi-chevron-right arr" id="arr-cdr"></i></div>
+        <div class="nc" id="nc-cdr">
+          <div class="nci" id="ni-cdr-sms" onclick="go('cdr-sms')">SMS Reports</div>
+          <div class="nci" id="ni-cdr-stat" onclick="go('cdr-stat')">SMS Stats</div>
+          <div class="nci" id="ni-cdr-cli" onclick="go('cdr-cli')">Client Stats</div>
+          <div class="nci" id="ni-cdr-rng" onclick="go('cdr-rng')">Range Stats</div>
+          <div class="nci" id="ni-cdr-num" onclick="go('cdr-num')">Number Stats</div>
+        </div>
+      </div>
+      <div class="nsec">
+        <div class="nlbl">Management</div>
+        <div class="ni" id="ni-news" onclick="go('news')"><i class="bi bi-newspaper"></i>News Master</div>
+        <div class="ni" id="ni-clients" onclick="go('clients')"><i class="bi bi-people-fill"></i>Clients</div>
+        <div class="ni" id="ni-credit" onclick="go('credit')"><i class="bi bi-file-earmark-text"></i>Credit Notes</div>
+        <div class="ni" id="ni-payment" onclick="go('payment')"><i class="bi bi-credit-card"></i>Payment Requests</div>
+        <div class="ni" id="ni-live" onclick="go('live')"><i class="bi bi-broadcast"></i>Live Access</div>
+        <div class="np" id="np-stmt" onclick="togM('stmt')"><div class="npl2"><i class="bi bi-file-earmark-bar-graph"></i>Statements</div><i class="bi bi-chevron-right arr" id="arr-stmt"></i></div>
+        <div class="nc" id="nc-stmt">
+          <div class="nci" id="ni-stmt-usd" onclick="go('stmt-usd')">USD Statements</div>
+          <div class="nci" id="ni-stmt-eur" onclick="go('stmt-eur')">EUR Statements</div>
+          <div class="nci" id="ni-stmt-gbp" onclick="go('stmt-gbp')">GBP Statements</div>
+        </div>
+      </div>
+      <div class="nsec">
+        <div class="nlbl">Tools</div>
+        <div class="ni" id="ni-test" onclick="go('test')"><i class="bi bi-send-check"></i>SMS Test Panel</div>
+        <div class="ni" id="ni-crapi" onclick="go('crapi')"><i class="bi bi-code-slash"></i>CR API</div>
+      </div>
+      <div class="nsec">
+        <div class="nlbl">Admin Control</div>
+        <div class="ni" id="ni-agents" onclick="go('agents')"><i class="bi bi-person-badge"></i>Agents</div>
+        <div class="ni" id="ni-invite" onclick="go('invite')"><i class="bi bi-link-45deg"></i>Invite Links</div>
+        <div class="ni" id="ni-apisrc" onclick="go('apisrc')"><i class="bi bi-cloud-arrow-up"></i>API Sources</div>
+        <div class="ni" id="ni-settings" onclick="go('settings')"><i class="bi bi-gear-fill"></i>Settings</div>
+      </div>
+    </div>
+
+    <!-- Agent nav -->
+    <div id="nav-agent" style="display:none;">
+      <div class="nsec">
+        <div class="nlbl">SMS Module</div>
+        <div class="ni" id="ni-ranges-ag" onclick="go('ranges')"><i class="bi bi-collection-fill"></i>SMS Ranges</div>
+        <div class="ni" id="ni-mynums" onclick="go('mynums')"><i class="bi bi-telephone-fill"></i>SMS Numbers</div>
+        <div class="ni" id="ni-bulk" onclick="go('bulk')"><i class="bi bi-diagram-3"></i>Bulk Allocation</div>
+      </div>
+      <div class="nsec">
+        <div class="nlbl">Management</div>
+        <div class="ni" id="ni-news-ag" onclick="go('news')"><i class="bi bi-newspaper"></i>News Master</div>
+        <div class="ni" id="ni-myclients" onclick="go('myclients')"><i class="bi bi-people-fill"></i>Clients</div>
+        <div class="np" id="np-cdr-ag" onclick="togM('cdr-ag')"><div class="npl2"><i class="bi bi-graph-up-arrow"></i>CDR & Stats</div><i class="bi bi-chevron-right arr" id="arr-cdr-ag"></i></div>
+        <div class="nc" id="nc-cdr-ag">
+          <div class="nci" id="ni-agcdr-sms" onclick="go('cdr-sms')">SMS Reports</div>
+          <div class="nci" id="ni-agcdr-stat" onclick="go('cdr-stat')">SMS Stats</div>
+          <div class="nci" id="ni-agcdr-cli" onclick="go('cdr-cli')">Client Stats</div>
+          <div class="nci" id="ni-agcdr-rng" onclick="go('cdr-rng')">Range Stats</div>
+          <div class="nci" id="ni-agcdr-num" onclick="go('cdr-num')">Number Stats</div>
+        </div>
+        <div class="ni" id="ni-credit-ag" onclick="go('credit')"><i class="bi bi-file-earmark-text"></i>Credit Notes</div>
+        <div class="ni" id="ni-payment-ag" onclick="go('payment')"><i class="bi bi-credit-card"></i>Payment Requests</div>
+        <div class="ni" id="ni-live-ag" onclick="go('live')"><i class="bi bi-broadcast"></i>Live Access</div>
+        <div class="np" id="np-stmt-ag" onclick="togM('stmt-ag')"><div class="npl2"><i class="bi bi-file-earmark-bar-graph"></i>Statements</div><i class="bi bi-chevron-right arr" id="arr-stmt-ag"></i></div>
+        <div class="nc" id="nc-stmt-ag">
+          <div class="nci" id="ni-agstmt-usd" onclick="go('stmt-usd')">USD Statements</div>
+          <div class="nci" id="ni-agstmt-eur" onclick="go('stmt-eur')">EUR Statements</div>
+          <div class="nci" id="ni-agstmt-gbp" onclick="go('stmt-gbp')">GBP Statements</div>
+        </div>
+      </div>
+      <div class="nsec">
+        <div class="nlbl">Tools</div>
+        <div class="ni" id="ni-test-ag" onclick="go('test')"><i class="bi bi-send-check"></i>SMS Test Panel</div>
+        <div class="ni" id="ni-crapi-ag" onclick="go('crapi')"><i class="bi bi-code-slash"></i>CR API</div>
+      </div>
+    </div>
+
+    <!-- Client nav -->
+    <div id="nav-client" style="display:none;">
+      <div class="nsec">
+        <div class="nlbl">Menu</div>
+        <div class="ni" id="ni-cli-nums" onclick="go('clinums')"><i class="bi bi-telephone-fill"></i>SMS Numbers</div>
+        <div class="np" id="np-cli-cdr" onclick="togM('cli-cdr')"><div class="npl2"><i class="bi bi-graph-up-arrow"></i>CDR & Stats</div><i class="bi bi-chevron-right arr" id="arr-cli-cdr"></i></div>
+        <div class="nc" id="nc-cli-cdr">
+          <div class="nci" id="ni-clicdr-sms" onclick="go('cdr-sms')">SMS Reports</div>
+          <div class="nci" id="ni-clicdr-stat" onclick="go('cdr-stat')">SMS Stats</div>
+        </div>
+        <div class="ni" id="ni-cli-test" onclick="go('test')"><i class="bi bi-send-check"></i>SMS Test Panel</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="main">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="section active" id="sec-dash">
+      <div class="ph"><div><h4><i class="bi bi-grid-1x2-fill me-2" style="color:var(--p)"></i>Dashboard</h4><div class="bc" id="dashdate"></div></div><div style="font-size:12px;color:#aaa;" id="dashgreet"></div></div>
+
+      <!-- Admin Dashboard -->
+      <div id="dash-admin" style="display:none;">
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-lg-3"><div class="sc c1"><div class="scic"><i class="bi bi-envelope-fill"></i></div><div class="sct">Today OTP</div><div class="scv" id="a-today">0</div><div class="scs" id="a-today-e">৳0.00</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c2"><div class="scic"><i class="bi bi-calendar-day"></i></div><div class="sct">Yesterday OTP</div><div class="scv" id="a-yest">0</div><div class="scs" id="a-yest-e">৳0.00</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c3"><div class="scic"><i class="bi bi-person-badge"></i></div><div class="sct">Agents</div><div class="scv" id="a-agents">0</div><div class="scs">Total active</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c4"><div class="scic"><i class="bi bi-collection"></i></div><div class="sct">Ranges</div><div class="scv" id="a-ranges">0</div><div class="scs">Active</div></div></div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-lg-3"><div class="sc c5"><div class="scic"><i class="bi bi-cash-stack"></i></div><div class="sct">Pending WD</div><div class="scv" id="a-pwd">0</div><div class="scs">Requests</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c6"><div class="scic"><i class="bi bi-calendar-month"></i></div><div class="sct">Month OTP</div><div class="scv" id="a-month">0</div><div class="scs" id="a-month-e">৳0.00</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c1"><div class="scic"><i class="bi bi-telephone-fill"></i></div><div class="sct">Numbers</div><div class="scv" id="a-nums">0</div><div class="scs">In system</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c2"><div class="scic"><i class="bi bi-cloud-check"></i></div><div class="sct">API Sources</div><div class="scv" id="a-apis">0</div><div class="scs">Active</div></div></div>
+        </div>
+      </div>
+
+      <!-- Agent Dashboard -->
+      <div id="dash-agent" style="display:none;">
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-lg-3"><div class="sc c1"><div class="scic"><i class="bi bi-envelope-fill"></i></div><div class="sct">Today's OTP</div><div class="scv" id="ag-today">0</div><div class="scs" id="ag-today-e">৳0.00</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c3"><div class="scic"><i class="bi bi-piggy-bank"></i></div><div class="sct">Total Earnings</div><div class="scv" id="ag-earn">৳0</div><div class="scs">All Time</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c4"><div class="scic"><i class="bi bi-clock-history"></i></div><div class="sct">Pending</div><div class="scv" id="ag-pend">৳0</div><div class="scs">Withdrawal</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c2"><div class="scic"><i class="bi bi-telephone-fill"></i></div><div class="sct">My Numbers</div><div class="scv" id="ag-nums">0</div><div class="scs">Assigned</div></div></div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-6 col-lg-3"><div class="sc c5"><div class="scic"><i class="bi bi-calendar-day"></i></div><div class="sct">Taken Today</div><div class="scv"><span id="ag-taken">0</span><span>/50</span></div><div class="scs">Daily limit</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c6"><div class="scic"><i class="bi bi-check-circle"></i></div><div class="sct">Paid Out</div><div class="scv" id="ag-paid">৳0</div><div class="scs">All Time</div></div></div>
+          <div class="col-6 col-lg-3"><div class="sc c1"><div class="scic"><i class="bi bi-people-fill"></i></div><div class="sct">Clients</div><div class="scv" id="ag-clis">0</div><div class="scs">My Clients</div></div></div>
+        </div>
+      </div>
+
+      <!-- Client Dashboard -->
+      <div id="dash-client" style="display:none;">
+        <div id="sc-today" class="sc-lg red"><div class="lg-t">Today SMS</div><div class="lg-v"><span id="cl-today">0</span><span>SMS</span></div><div class="lg-s">$ <span id="cl-today-r">0</span> Revenue</div></div>
+        <div id="sc-yest" class="sc-lg orange"><div class="lg-t">Yesterday SMS</div><div class="lg-v"><span id="cl-yest">0</span><span>SMS</span></div><div class="lg-s">$ <span id="cl-yest-r">0</span> Revenue</div></div>
+        <div id="sc-week" class="sc-lg blue"><div class="lg-t">Week SMS</div><div class="lg-v"><span id="cl-week">0</span><span>SMS</span></div><div class="lg-s">$ <span id="cl-week-r">0</span> Revenue</div></div>
+      </div>
+
+      <!-- Chart (all roles) -->
+      <div class="row g-3 mt-1">
+        <div class="col-lg-8"><div class="crd"><div class="ct"><i class="bi bi-bar-chart-fill me-2" style="color:var(--p)"></i><span id="chart-title">Weekly Statistics</span></div><div class="cs">Last 7 days</div><div id="main-chart" style="margin-top:8px;"></div></div></div>
+        <div class="col-lg-4"><div class="tw"><div class="twh"><div class="tt"><i class="bi bi-clock-history me-1" style="color:var(--p)"></i>Recent Ranges</div></div><div style="overflow-y:auto;max-height:310px;"><table><thead><tr><th>Range</th><th>Payterm</th></tr></thead><tbody id="dash-ranges"><tr><td colspan="2" style="text-align:center;color:#bbb;padding:20px;">Loading...</td></tr></tbody></table></div></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SMS RANGES ═══ -->
+    <div class="section" id="sec-ranges">
+      <div class="ph"><div><h4><i class="bi bi-collection-fill me-2" style="color:var(--p)"></i>SMS Ranges</h4><div class="bc">SMS Module / SMS Ranges</div></div><div id="range-add-btn"></div></div>
+      <div class="tw">
+        <div class="twh"><div class="tt">Manage SMS Ranges</div><div class="sb2" style="width:190px;"><i class="bi bi-search"></i><input type="text" id="rq" placeholder="Search..." oninput="filterRanges()"></div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Range Name</th><th>Prefix</th><th>Test Number</th><th>Currency</th><th>Payterm</th><th>Payout</th><th>Status</th><th>Action</th></tr></thead><tbody id="ranges-tb"><tr><td colspan="9" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div class="twf"><span id="ranges-cnt">0</span><span>Power SMS</span></div>
+      </div>
+    </div>
+
+    <!-- ═══ ADMIN: ALL NUMBERS ═══ -->
+    <div class="section" id="sec-anums">
+      <div class="ph"><div><h4><i class="bi bi-telephone-fill me-2" style="color:var(--p)"></i>SMS Numbers</h4><div class="bc">Admin / All Numbers</div></div><button class="btn-p" onclick="openAddNums()"><i class="bi bi-plus-circle me-1"></i>Add Numbers</button></div>
+      <div class="row g-2 mb-3">
+        <div class="col-md-4"><select id="nf-range" class="fc2" onchange="loadAdminNums()"><option value="">All Ranges</option></select></div>
+        <div class="col-md-3"><select id="nf-status" class="fc2" onchange="loadAdminNums()"><option value="">All Status</option><option value="available">Available</option><option value="assigned">Assigned</option></select></div>
+      </div>
+      <div class="tw">
+        <div class="twh"><div class="tt">All Numbers</div><span id="anums-cnt" style="font-size:11.5px;color:#aaa;"></span></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Number</th><th>Range</th><th>Agent</th><th>Client</th><th>Status</th><th>Action</th></tr></thead><tbody id="anums-tb"><tr><td colspan="7" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ AGENT: MY NUMBERS ═══ -->
+    <div class="section" id="sec-mynums">
+      <div class="ph"><div><h4><i class="bi bi-telephone-fill me-2" style="color:var(--p)"></i>SMS Numbers</h4><div class="bc">SMS Module / My Numbers</div></div>
+        <span id="mynums-cnt" style="font-size:12px;color:#aaa;"></span>
+      </div>
+      <!-- Filters -->
+      <div class="crd mb-3" style="padding:12px 16px;">
+        <div class="row g-2 align-items-end">
+          <div class="col-6 col-md-3">
+            <label class="fl2">Filter by Range</label>
+            <select id="mn-frange" class="fc2" onchange="filterMyNums()"><option value="">All Ranges</option></select>
+          </div>
+          <div class="col-6 col-md-3">
+            <label class="fl2">Filter by Client</label>
+            <select id="mn-fclient" class="fc2" onchange="filterMyNums()"><option value="">All Clients</option><option value="unassigned">Unassigned</option></select>
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="fl2">Search Number</label>
+            <div class="sb2"><i class="bi bi-search"></i><input type="text" id="mn-fsearch" placeholder="Search number..." oninput="filterMyNums()"></div>
+          </div>
+          <div class="col-12 col-md-2">
+            <button class="btn-p w-100" onclick="loadMyNums()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+          </div>
+        </div>
+      </div>
+      <!-- Bulk Action Bar -->
+      <div id="mn-bulk-bar" style="display:none;background:#f0ecff;border:1px solid #d4aaff;border-radius:10px;padding:10px 14px;margin-bottom:10px;display:none;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span id="mn-sel-cnt" style="font-size:12.5px;font-weight:600;color:var(--pd);"></span>
+        <select id="mn-bulk-client" class="fc2" style="width:180px;"><option value="">Select Client to Assign</option></select>
+        <button class="btn-p" style="padding:6px 14px;font-size:12.5px;" onclick="bulkAssignToClient()"><i class="bi bi-person-check me-1"></i>Assign Selected</button>
+        <button class="bsm bd" style="padding:6px 12px;" onclick="bulkUnassign()"><i class="bi bi-x-circle me-1"></i>Unassign Selected</button>
+      </div>
+      <div class="tw">
+        <div class="twh">
+          <div class="tt">My Assigned Numbers</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="font-size:12px;color:#888;cursor:pointer;"><input type="checkbox" id="mn-chk-all" onchange="toggleAllNums(this)"> Select All</label>
+          </div>
+        </div>
+        <div style="overflow-x:auto;"><table><thead><tr><th style="width:36px;"><input type="checkbox" id="mn-chk-all2" onchange="toggleAllNums(this)"></th><th>#</th><th>Number</th><th>Range</th><th>Client</th><th>Status</th><th>Action</th></tr></thead><tbody id="mynums-tb"><tr><td colspan="7" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div class="twf"><span id="mn-showing" style="color:#bbb;font-size:11.5px;"></span></div>
+      </div>
+    </div>
+
+    <!-- ═══ CLIENT: MY NUMBERS ═══ -->
+    <div class="section" id="sec-clinums">
+      <div class="ph"><div><h4><i class="bi bi-telephone-fill me-2" style="color:var(--p)"></i>SMS Numbers</h4><div class="bc">SMS Numbers</div></div></div>
+      <div class="tw">
+        <div class="twh"><div class="tt">My Numbers</div><span id="clinums-cnt" style="font-size:11.5px;color:#aaa;"></span></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Number</th><th>Range</th><th>Status</th></tr></thead><tbody id="clinums-tb"><tr><td colspan="4" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ ADMIN: AGENTS ═══ -->
+    <div class="section" id="sec-agents">
+      <div class="ph"><div><h4><i class="bi bi-person-badge me-2" style="color:var(--p)"></i>Agents</h4><div class="bc">Admin / Agents</div></div></div>
+      <div class="tw"><div class="twh"><div class="tt">All Agents</div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Username</th><th>Name</th><th>Clients</th><th>Numbers</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead><tbody id="agents-tb"><tr><td colspan="8" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ AGENT: MY CLIENTS ═══ -->
+    <div class="section" id="sec-myclients">
+      <div class="ph"><div><h4><i class="bi bi-people-fill me-2" style="color:var(--p)"></i>Clients</h4><div class="bc">Management / My Clients</div></div><button class="btn-p" onclick="openAddClient()"><i class="bi bi-plus-circle me-1"></i>Add Client</button></div>
+      <div class="tw"><div class="twh"><div class="tt">My Clients</div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Username</th><th>Name</th><th>Numbers</th><th>Status</th><th>Action</th></tr></thead><tbody id="myclients-tb"><tr><td colspan="6" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ INVITE LINKS ═══ -->
+    <div class="section" id="sec-invite">
+      <div class="ph"><div><h4><i class="bi bi-link-45deg me-2" style="color:var(--p)"></i>Invite Links</h4><div class="bc">Admin / Invite Links</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-p" onclick="genInvite('agent')"><i class="bi bi-plus-circle me-1"></i>Agent Link</button>
+        </div>
+      </div>
+      <div id="invite-url-warn" class="infob mb-3" style="display:none;background:#fff8e1;border-color:#fcd34d;color:#92400e;">
+        <i class="bi bi-exclamation-triangle me-1"></i><strong>Warning:</strong> Site URL is not set in Settings. Links are using localhost which won't work for others. Go to <strong>Settings → General → Site URL</strong> and set your real Netlify URL.
+      </div>
+      <div class="crd">
+        <div class="ct mb-2">Generated Links</div>
+        <div id="invite-cards"><div style="text-align:center;padding:28px;color:#bbb;">Loading...</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ API SOURCES ═══ -->
+    <div class="section" id="sec-apisrc">
+      <div class="ph"><div><h4><i class="bi bi-cloud-arrow-up me-2" style="color:var(--p)"></i>API Sources</h4><div class="bc">Admin / API Sources</div></div><button class="btn-p" onclick="openAddApi()"><i class="bi bi-plus-circle me-1"></i>Add Source</button></div>
+      <div class="infob mb-3"><i class="bi bi-shield-check me-1"></i><strong>Security:</strong> API Source information is completely hidden from Agents and Clients. No one will know where the OTP is coming from.</div>
+      <div class="tw"><div class="twh"><div class="tt">API Sources</div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Name</th><th>Base URL</th><th>Token (masked)</th><th>Status</th><th>Action</th></tr></thead><tbody id="apisrc-tb"><tr><td colspan="6" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div class="section" id="sec-settings">
+      <div class="ph"><div><h4><i class="bi bi-gear-fill me-2" style="color:var(--p)"></i>Settings</h4><div class="bc">Admin / Settings</div></div></div>
+      <div class="stabs"><div class="stab active" onclick="showStab('general',this)">General</div><div class="stab" onclick="showStab('pmt',this)">Payment</div><div class="stab" onclick="showStab('sec',this)">Security</div></div>
+      <div id="stab-general">
+        <div class="crd"><div class="ct mb-3">OTP & Earning Settings</div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="fl2">Earnings per OTP (৳)</label><input type="number" id="set-rate" class="fc2" placeholder="0.50" step="0.01"></div>
+            <div class="col-md-4"><label class="fl2">Min Withdrawal (৳)</label><input type="number" id="set-minwd" class="fc2" placeholder="500"></div>
+            <div class="col-md-4"><label class="fl2">Daily Number Limit</label><input type="number" id="set-dlimit" class="fc2" placeholder="50"></div>
+            <div class="col-md-6"><label class="fl2">Site Name</label><input type="text" id="set-sitename" class="fc2" placeholder="Power SMS"></div>
+            <div class="col-md-6"><label class="fl2">Admin Contact</label><input type="text" id="set-contact" class="fc2" placeholder="Telegram/WhatsApp"></div>
+            <div class="col-12"><label class="fl2">🌐 Site URL (Netlify URL)</label><input type="text" id="set-siteurl" class="fc2" placeholder="https://yoursite.netlify.app"></div>
+          </div>
+          <button class="btn-p mt-3" onclick="saveSettings()"><i class="bi bi-check-circle me-1"></i>Save Settings</button>
+        </div>
+      </div>
+      <div id="stab-pmt" style="display:none;">
+        <div class="crd"><div class="ct mb-3">Payment Methods</div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="fl2">💚 bKash Number</label><input type="text" id="set-bkash" class="fc2" placeholder="01XXXXXXXXX"></div>
+            <div class="col-md-4"><label class="fl2">🟠 Nagad Number</label><input type="text" id="set-nagad" class="fc2" placeholder="01XXXXXXXXX"></div>
+            <div class="col-md-4"><label class="fl2">🔵 USDT (TRC20)</label><input type="text" id="set-usdt" class="fc2" placeholder="T..."></div>
+          </div>
+          <button class="btn-p mt-3" onclick="saveSettings()"><i class="bi bi-check-circle me-1"></i>Save</button>
+        </div>
+      </div>
+      <div id="stab-sec" style="display:none;">
+        <div class="crd"><div class="ct mb-3">Change Password</div>
+          <div class="row g-3">
+            <div class="col-md-4"><label class="fl2">Current Password</label><input type="password" id="set-oldp" class="fc2"></div>
+            <div class="col-md-4"><label class="fl2">New Password</label><input type="password" id="set-newp" class="fc2"></div>
+            <div class="col-md-4"><label class="fl2">Confirm New</label><input type="password" id="set-newp2" class="fc2"></div>
+          </div>
+          <button class="btn-p mt-3" onclick="changePass()"><i class="bi bi-lock me-1"></i>Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PAYMENT REQUESTS ═══ -->
+    <div class="section" id="sec-payment">
+      <div class="ph"><div><h4><i class="bi bi-credit-card me-2" style="color:var(--p)"></i>Payment Requests</h4><div class="bc">Withdrawal Requests</div></div><div id="wd-btn-area"></div></div>
+      <div id="wd-admin-filter" class="row g-2 mb-3" style="display:none;">
+        <div class="col-auto"><select id="wdf-status" class="fc2" onchange="loadWithdrawals()" style="width:140px;"><option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
+        <div class="col-auto"><select id="wdf-method" class="fc2" onchange="loadWithdrawals()" style="width:140px;"><option value="">All Methods</option><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="usdt">USDT</option></select></div>
+      </div>
+      <div class="tw"><div class="twh"><div class="tt">Requests</div><span id="wd-cnt" style="font-size:11.5px;color:#aaa;"></span></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Agent</th><th>Amount</th><th>Method</th><th>Account</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody id="wd-tb"><tr><td colspan="8" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ NEWS ═══ -->
+    <div class="section" id="sec-news">
+      <div class="ph"><div><h4><i class="bi bi-newspaper me-2" style="color:var(--p)"></i>News Master</h4><div class="bc">Management / News</div></div><div id="news-add-btn"></div></div>
+      <div class="tw"><div class="twh"><div class="tt">All News</div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Title</th><th>Content</th><th>Date</th><th>Action</th></tr></thead><tbody id="news-tb"><tr><td colspan="5" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ LIVE ACCESS ═══ -->
+    <div class="section" id="sec-live">
+      <div class="ph"><div><h4><i class="bi bi-broadcast me-2" style="color:var(--p)"></i>Live Access</h4><div class="bc">Management / Live Access</div></div><button class="btn-p" onclick="loadLive()"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button></div>
+      <div class="tw"><div class="twh"><div class="tt">Live SMS Access</div><span id="live-cnt" style="font-size:11.5px;color:#aaa;"></span></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Range</th><th>Number</th><th>SenderID</th><th>Message</th></tr></thead><tbody id="live-tb"><tr><td colspan="5" style="text-align:center;padding:30px;color:#bbb;">Click Refresh</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ SMS TEST PANEL ═══ -->
+    <div class="section" id="sec-test">
+      <div class="ph"><div><h4><i class="bi bi-send-check me-2" style="color:var(--p)"></i>SMS Test Panel</h4><div class="bc">Tools / SMS Test Panel</div></div></div>
+      <div class="row g-3">
+        <div class="col-lg-5"><div class="crd"><div class="ct mb-3">SMS Test Numbers</div>
+          <div class="mbf"><select id="testf-range" class="fc2" onchange="loadTestNums()"><option value="">All Ranges</option></select></div>
+          <div class="tw" style="margin-bottom:0;"><table><thead><tr><th>Range</th><th>Prefix</th><th>Test Number</th><th>Payout</th></tr></thead><tbody id="testnums-tb"><tr><td colspan="4" style="text-align:center;padding:20px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        </div></div>
+        <div class="col-lg-7"><div class="crd"><div class="ct mb-3">Recent SMS Test</div>
+          <div class="row g-2 mb-3">
+            <div class="col"><input type="text" id="test-num" class="fc2" placeholder="Test Number"></div>
+            <div class="col"><select id="test-range" class="fc2"><option value="">Select Range</option></select></div>
+            <div class="col-auto"><button class="btn-p" onclick="fetchTestOTP()"><i class="bi bi-search me-1"></i>Fetch OTP</button></div>
+          </div>
+          <div id="test-result" style="display:none;"></div>
+          <div class="tw" style="margin-bottom:0;"><div class="twh"><div class="tt">Recent Test OTPs</div></div>
+          <table><thead><tr><th>Date</th><th>Range</th><th>Number</th><th>CLI</th><th>OTP</th></tr></thead><tbody id="recent-test-tb"><tr><td colspan="5" style="text-align:center;padding:20px;color:#bbb;">No recent tests</td></tr></tbody></table></div>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ═══ CR API ═══ -->
+    <div class="section" id="sec-crapi">
+      <div class="ph"><div><h4><i class="bi bi-code-slash me-2" style="color:var(--p)"></i>CR API</h4><div class="bc">Tools / CR API</div></div></div>
+      <div class="crd"><div class="ct">API Credentials</div>
+        <div style="margin-top:10px;background:#f8f5ff;border-radius:10px;padding:14px;">
+          <div style="font-size:12.5px;color:#555;font-weight:600;margin-bottom:5px;">Your API Token:</div>
+          <div id="my-api-token" style="font-family:monospace;font-size:12px;color:var(--pd);word-break:break-all;padding:9px;background:#fff;border-radius:8px;border:1px solid #e0d5ff;"></div>
+          <button class="btn-p mt-2" onclick="copyToken()"><i class="bi bi-copy me-1"></i>Copy Token</button>
+        </div>
+        <div style="margin-top:12px;"><div style="font-size:12.5px;color:#555;font-weight:600;margin-bottom:4px;">API Base URL:</div><div id="api-base" style="font-family:monospace;font-size:11px;color:#777;padding:7px;background:#f9f9f9;border-radius:8px;word-break:break-all;"></div></div>
+      </div>
+      <div class="crd"><div class="ct mb-3">API Playground</div>
+        <div class="row g-3">
+          <div class="col-md-3"><label class="fl2">Date Start</label><input type="datetime-local" id="api-d1" class="fc2"></div>
+          <div class="col-md-3"><label class="fl2">Date End</label><input type="datetime-local" id="api-d2" class="fc2"></div>
+          <div class="col-md-3"><label class="fl2">Filter Number</label><input type="text" id="api-num" class="fc2" placeholder="Number"></div>
+          <div class="col-md-3"><label class="fl2">Records</label><input type="number" id="api-rec" class="fc2" value="10"></div>
+        </div>
+        <button class="btn-p mt-3" onclick="previewApi()"><i class="bi bi-play me-1"></i>Preview</button>
+        <div id="api-result" style="display:none;margin-top:12px;background:#1a1a2e;border-radius:10px;padding:14px;font-family:monospace;font-size:11.5px;color:#00ff88;white-space:pre-wrap;word-break:break-all;min-height:80px;"></div>
+      </div>
+    </div>
+
+    <!-- ═══ BULK ALLOCATION ═══ -->
+    <div class="section" id="sec-bulk">
+      <div class="ph"><div><h4><i class="bi bi-diagram-3-fill me-2" style="color:var(--p)"></i>SMS Bulk Allocation</h4><div class="bc">SMS Module / Bulk Allocation</div></div></div>
+      <div class="crd">
+        <div class="ct mb-3">Allocate Numbers</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="mbf"><label class="fl2">Choose Range (Multiple)</label>
+              <select id="bulk-ranges" class="fc2" multiple style="height:120px;"><option value="">Loading ranges...</option></select>
+            </div>
+            <div class="mbf"><label class="fl2">Choose Client (Multiple)</label>
+              <select id="bulk-clients" class="fc2" multiple style="height:100px;"><option value="">Loading clients...</option></select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mbf"><label class="fl2">Choose Payterm</label>
+              <select id="bulk-payterm" class="fc2">
+                <option value="">Please Select</option>
+                <option value="Daily">Daily</option>
+                <option value="Weekly 7/1">Weekly 7/1</option>
+                <option value="Weekly 7/7">Weekly 7/7</option>
+                <option value="BiWeekly">BiWeekly</option>
+                <option value="Monthly 30/45">Monthly 30/45</option>
+                <option value="Monthly 30/60">Monthly 30/60</option>
+              </select>
+            </div>
+            <div class="mbf"><label class="fl2">Payout ($ per SMS)</label>
+              <input type="number" id="bulk-payout" class="fc2" placeholder="0.0100" step="0.0001" value="0">
+            </div>
+            <div class="mbf"><label class="fl2">Qty per Range to Allocate</label>
+              <input type="number" id="bulk-qty" class="fc2" placeholder="e.g. 100" value="10">
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;margin-top:10px;">
+          <button class="btn-p" style="padding:10px 32px;font-size:14px;" onclick="doBulkAllocate()"><i class="bi bi-diagram-3 me-2"></i>Allocate Numbers</button>
+        </div>
+      </div>
+      <div class="tw">
+        <div class="twh"><div class="tt"><i class="bi bi-clock-history me-1" style="color:var(--p)"></i>Recent Allocations</div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Client</th><th>Ranges</th><th>Qty/Range</th><th>Total Numbers</th><th>Payterm</th><th>Payout</th></tr></thead>
+        <tbody id="bulk-tb"><tr><td colspan="7" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ═══ CLIENTS (Admin/Agent) ═══ -->
+    <div class="section" id="sec-clients">
+      <div class="ph">
+        <div><h4><i class="bi bi-people-fill me-2" style="color:var(--p)"></i>Manage Clients</h4><div class="bc">Management / Clients</div></div>
+        <button class="btn-p" onclick="openAddClient2()"><i class="bi bi-plus-circle me-1"></i>Add Client</button>
+      </div>
+      <div class="tw">
+        <div class="twh">
+          <div class="tt">All Clients</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="sb2" style="width:180px;"><i class="bi bi-search"></i><input type="text" id="cli-q" placeholder="Search..." oninput="filterClients()"></div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Username</th><th>Name</th><th>Company</th><th>Email</th><th>Contact</th><th>Country</th><th>Numbers</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="clients2-tb"><tr><td colspan="10" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div class="twf"><span id="clients2-cnt">0 records</span><span>Power SMS</span></div>
+      </div>
+    </div>
+
+    <!-- ═══ CDR REPORTS ═══ -->
+    <div class="section" id="sec-cdr-sms">
+      <div class="ph"><div><h4><i class="bi bi-graph-up me-2" style="color:var(--p)"></i>SMS CDR Reports</h4><div class="bc">CDR & Stats / SMS Reports</div></div></div>
+      <div class="crd">
+        <div class="ct mb-3">Filter</div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-3"><label class="fl2">Date Start</label><input type="datetime-local" id="cdr-d1" class="fc2"></div>
+          <div class="col-md-3"><label class="fl2">Date End</label><input type="datetime-local" id="cdr-d2" class="fc2"></div>
+          <div class="col-md-3"><label class="fl2">Filter Range</label><select id="cdr-range" class="fc2"><option value="">All Ranges</option></select></div>
+          <div class="col-md-3"><label class="fl2">Filter Client</label><select id="cdr-client" class="fc2"><option value="">All Clients</option></select></div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-3"><label class="fl2">Search Number</label><input type="text" id="cdr-num" class="fc2" placeholder="Number"></div>
+          <div class="col-md-3"><label class="fl2">Search CLI</label><input type="text" id="cdr-cli" class="fc2" placeholder="CLI"></div>
+          <div class="col-auto" style="display:flex;align-items:flex-end;gap:8px;">
+            <button class="btn-p" onclick="loadCDR()"><i class="bi bi-search me-1"></i>Show Report</button>
+            <button class="btn-p" style="background:linear-gradient(135deg,#f59e0b,#ef4444);" onclick="exportCDR()"><i class="bi bi-download me-1"></i>Export</button>
+          </div>
+        </div>
+      </div>
+      <!-- Totals summary -->
+      <div class="row g-3 mb-3" id="cdr-totals" style="display:none;">
+        <div class="col-md-3"><div class="sc c1"><div class="sct">Total SMS</div><div class="scv" id="cdr-tot-sms">0</div></div></div>
+        <div class="col-md-3"><div class="sc c3"><div class="sct">My Payout (USD)</div><div class="scv" id="cdr-tot-in">$0.00</div></div></div>
+        <div class="col-md-3"><div class="sc c4"><div class="sct">Client Payout (USD)</div><div class="scv" id="cdr-tot-out">$0.00</div></div></div>
+        <div class="col-md-3"><div class="sc c5"><div class="sct">Profit (USD)</div><div class="scv" id="cdr-tot-profit">$0.00</div></div></div>
+      </div>
+      <div class="tw">
+        <div class="twh"><div class="tt">CDR Report</div><span id="cdr-cnt" style="font-size:11.5px;color:#aaa;"></span></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>Date</th><th>Range</th><th>Number</th><th>CLI</th><th>Client</th><th>SMS</th><th>Currency</th><th>My Payout</th><th>Client Payout</th><th>Profit</th></tr></thead>
+        <tbody id="cdr-tb"><tr><td colspan="10" style="text-align:center;padding:30px;color:#bbb;">Apply filter and click Show Report</td></tr></tbody></table></div>
+        <!-- Totals footer -->
+        <div id="cdr-foot-totals" style="display:none;padding:12px 16px;background:#fafafa;border-top:1px solid #f0f0f0;">
+          <div class="row g-2 text-center" style="font-size:12px;font-weight:600;color:#555;">
+            <div class="col">Total SMS: <span id="cdr-f-sms" style="color:var(--p)">0</span></div>
+            <div class="col">USD In: <span id="cdr-f-usdin" style="color:#10b981">$0</span></div>
+            <div class="col">USD Out: <span id="cdr-f-usdout" style="color:#f59e0b">$0</span></div>
+            <div class="col">USD Profit: <span id="cdr-f-usdprofit" style="color:#6f42c1">$0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CDR STATS (coming soon with basic structure) -->
+    <div class="section" id="sec-cdr-stat">
+      <div class="ph"><div><h4><i class="bi bi-bar-chart me-2" style="color:var(--p)"></i>SMS Stats</h4><div class="bc">CDR & Stats / SMS Stats</div></div></div>
+      <div class="crd">
+        <div class="ct mb-3">SMS Statistics</div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-3"><label class="fl2">Group By</label>
+            <select id="stat-group" class="fc2" onchange="loadSMSStats()">
+              <option value="day">Daily</option>
+              <option value="month">Monthly</option>
+              <option value="range">By Range</option>
+              <option value="client">By Client</option>
+            </select>
+          </div>
+          <div class="col-md-3"><label class="fl2">Date Start</label><input type="date" id="stat-d1" class="fc2"></div>
+          <div class="col-md-3"><label class="fl2">Date End</label><input type="date" id="stat-d2" class="fc2"></div>
+          <div class="col-auto" style="display:flex;align-items:flex-end;"><button class="btn-p" onclick="loadSMSStats()"><i class="bi bi-search me-1"></i>Show</button></div>
+        </div>
+        <div id="stat-chart" style="min-height:280px;"></div>
+      </div>
+      <div class="tw">
+        <div class="twh"><div class="tt">Stats Table</div></div>
+        <div style="overflow-x:auto;"><table><thead><tr><th>Period/Group</th><th>SMS Count</th><th>My Payout</th><th>Client Payout</th><th>Profit</th></tr></thead>
+        <tbody id="stat-tb"><tr><td colspan="5" style="text-align:center;padding:25px;color:#bbb;">Select filters and click Show</td></tr></tbody></table></div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-cdr-cli"><div class="ph"><div><h4><i class="bi bi-person-lines-fill me-2" style="color:var(--p)"></i>Client Stats</h4><div class="bc">CDR & Stats / Client Stats</div></div></div><div class="csw"><span class="csic">👤</span><h5>Client Stats</h5><p>Coming Soon</p></div></div>
+    <div class="section" id="sec-cdr-rng"><div class="ph"><div><h4><i class="bi bi-collection me-2" style="color:var(--p)"></i>Range Stats</h4><div class="bc">CDR & Stats / Range Stats</div></div></div><div class="csw"><span class="csic">📡</span><h5>Range Stats</h5><p>Coming Soon</p></div></div>
+    <div class="section" id="sec-cdr-num"><div class="ph"><div><h4><i class="bi bi-telephone me-2" style="color:var(--p)"></i>Number Stats</h4><div class="bc">CDR & Stats / Number Stats</div></div></div><div class="csw"><span class="csic">📞</span><h5>Number Stats</h5><p>Coming Soon</p></div></div>
+    <div class="section" id="sec-credit"><div class="ph"><div><h4><i class="bi bi-file-earmark-text me-2" style="color:var(--p)"></i>Credit Notes</h4><div class="bc">Management / Credit Notes</div></div></div><div class="csw"><span class="csic">📄</span><h5>Credit Notes</h5><p>Coming Soon</p></div></div>
+    <div class="section" id="sec-stmt-usd"><div class="ph"><div><h4>USD Statements</h4></div></div><div class="csw"><span class="csic">💵</span><h5>USD Statements</h5><p>Coming Soon</p></div></div>
+    <div class="section" id="sec-stmt-eur"><div class="ph"><div><h4>EUR Statements</h4></div></div><div class="csw"><span class="csic">💶</span><h5>EUR Statements</h5><p>Coming Soon</p></div></div>
+    <div class="section" id="sec-stmt-gbp"><div class="ph"><div><h4>GBP Statements</h4></div></div><div class="csw"><span class="csic">💷</span><h5>GBP Statements</h5><p>Coming Soon</p></div></div>
+
+    <div class="foot">Power SMS &copy; <span id="ftyr"></span> &bull; Premium SMS Management Panel</div>
+  </main>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- Range Modal -->
+<div class="modal fade" id="rangeModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-collection me-2"></i><span id="rm-t">Add Range</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="rm-id">
+    <div class="row g-3">
+      <div class="col-md-8"><label class="fl2">Range Name *</label><input type="text" id="rm-name" class="fc2" placeholder="e.g. BANGLADESH MULTI GLOBAL KK"></div>
+      <div class="col-md-4"><label class="fl2">Prefix</label><input type="text" id="rm-prefix" class="fc2" placeholder="880"></div>
+      <div class="col-md-6"><label class="fl2">Test Number</label><input type="text" id="rm-test" class="fc2" placeholder="8801XXXXXXXXX"></div>
+      <div class="col-md-2"><label class="fl2">Currency</label><select id="rm-cur" class="fc2"><option>USD</option><option>BDT</option><option>EUR</option><option>GBP</option></select></div>
+      <div class="col-md-2"><label class="fl2">Payout $</label><input type="number" id="rm-payout" class="fc2" placeholder="0.012" step="0.001"></div>
+      <div class="col-md-2"><label class="fl2">Status</label><select id="rm-status" class="fc2"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+      <div class="col-md-6"><label class="fl2">Payterm</label><select id="rm-payterm" class="fc2"><option>Weekly 7/1</option><option>Weekly 7/7</option><option>Monthly 30/45</option><option>Prepaid 1/1</option></select></div>
+      <div class="col-md-6"><label class="fl2">API Source</label><select id="rm-api" class="fc2"><option value="">None</option></select></div>
+      <div class="col-12"><label class="fl2">Memo</label><textarea id="rm-memo" class="fc2" rows="2" placeholder="Optional notes..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:8px 16px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="saveRange()"><i class="bi bi-check-circle me-1"></i><span id="rm-slbl">Save Range</span></button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Request Numbers Modal (Agent) -->
+<div class="modal fade" id="reqModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-telephone-plus me-2"></i>Request Numbers</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="req-rid">
+    <div class="mbf"><label class="fl2">Range</label><input type="text" id="req-rname" class="fc2" readonly style="background:#fafafa;"></div>
+    <div class="mbf"><label class="fl2">Payment Term</label><input type="text" id="req-payterm" class="fc2" readonly style="background:#fafafa;"></div>
+    <div class="mbf"><label class="fl2">Quantity</label>
+      <select id="req-qty" class="fc2"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option><option value="40">40</option><option value="45">45</option><option value="50">50</option></select>
+    </div>
+    <div id="req-info" style="font-size:11.5px;color:#aaa;margin-bottom:8px;"></div>
+    <div id="req-warn" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px;font-size:12.5px;color:#92400e;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Close</button>
+      <button class="btn-p" id="req-btn" onclick="submitRequest()"><i class="bi bi-send me-1"></i>Request</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Add Numbers Modal (Admin) -->
+<div class="modal fade" id="addNumModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-telephone-plus me-2"></i>Add Numbers</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div class="mbf"><label class="fl2">Range *</label><select id="an-range" class="fc2"><option value="">Select Range</option></select></div>
+    <div class="mbf"><label class="fl2">Numbers (one per line)</label><textarea id="an-nums" class="fc2" rows="10" placeholder="8801XXXXXXXXX&#10;8801XXXXXXXXX&#10;8801XXXXXXXXX"></textarea></div>
+    <div style="font-size:11.5px;color:#aaa;margin-bottom:10px;">You can add as many numbers as you like.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="saveNumbers()"><i class="bi bi-check-circle me-1"></i>Add Numbers</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Assign Numbers to Agent Modal -->
+<div class="modal fade" id="agNumModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Assign Numbers</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="agn-uid">
+    <div class="mbf"><label class="fl2">Agent</label><input type="text" id="agn-uname" class="fc2" readonly style="background:#fafafa;"></div>
+    <div class="mbf"><label class="fl2">Range *</label><select id="agn-range" class="fc2" onchange="checkAvail()"><option value="">Select Range</option></select></div>
+    <div class="mbf"><label class="fl2">Quantity *</label><input type="number" id="agn-qty" class="fc2" placeholder="e.g. 1000"></div>
+    <div id="agn-avail" style="font-size:11.5px;color:#aaa;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="assignNums()"><i class="bi bi-check-circle me-1"></i>Assign</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Assign Number to Client Modal (Agent) -->
+<div class="modal fade" id="cliNumModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Assign Number to Client</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="cn-nid">
+    <div class="mbf"><label class="fl2">Number</label><input type="text" id="cn-num" class="fc2" readonly style="background:#fafafa;"></div>
+    <div class="mbf"><label class="fl2">Client *</label><select id="cn-client" class="fc2"><option value="">Select Client</option></select></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="assignToClient()"><i class="bi bi-check-circle me-1"></i>Assign</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Add Client Modal (Agent) -->
+<div class="modal fade" id="addCliModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-plus me-2"></i>Add Client</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div class="infob mb-3">Client-An invite link will be created. Once sent, the Client can create their own account.</div>
+    <button class="btn-p" onclick="genClientInvite()"><i class="bi bi-link-45deg me-1"></i>Generate Client Invite Link</button>
+    <div id="cli-link-box" style="display:none;margin-top:12px;background:#f0fff4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;">
+      <div style="font-size:11.5px;font-weight:600;color:#065f46;margin-bottom:5px;">Client Invite Link:</div>
+      <div id="cli-link-url" style="font-family:monospace;font-size:11px;color:#065f46;word-break:break-all;margin-bottom:8px;"></div>
+      <button class="btn-p" onclick="copyCliLink()"><i class="bi bi-copy me-1"></i>Copy Link</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- API Source Modal -->
+<div class="modal fade" id="apiModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-cloud-plus me-2"></i><span id="api-t">Add API Source</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="api-id">
+    <div class="mbf"><label class="fl2">Name *</label><input type="text" id="api-name" class="fc2" placeholder="e.g. Konekta Premium"></div>
+    <div class="mbf"><label class="fl2">Base URL *</label><input type="text" id="api-url" class="fc2" placeholder="http://..."></div>
+    <div class="mbf"><label class="fl2">API Token *</label><input type="text" id="api-token" class="fc2" placeholder="Token"></div>
+    <div class="mbf"><label class="fl2">Status</label><select id="api-status" class="fc2"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="saveApi()"><i class="bi bi-check-circle me-1"></i><span id="api-slbl">Save</span></button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Withdrawal Modal (Agent) -->
+<div class="modal fade" id="wdModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-cash-coin me-2"></i>Withdrawal Request</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body">
+    <div id="wd-bal-info" style="background:#f0fff4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;"></div>
+    <div class="mbf"><label class="fl2">Method *</label>
+      <select id="wd-method" class="fc2" onchange="updWdMethod()"><option value="">Select</option><option value="bkash">💚 bKash</option><option value="nagad">🟠 Nagad</option><option value="usdt">🔵 USDT (TRC20)</option></select>
+    </div>
+    <div class="mbf"><label class="fl2" id="wd-acc-lbl">Account *</label><input type="text" id="wd-account" class="fc2" placeholder="Account number/address"></div>
+    <div class="mbf"><label class="fl2">Amount (৳) *</label><input type="number" id="wd-amount" class="fc2" placeholder="Minimum amount"></div>
+    <div id="wd-pmtinfo" style="font-size:11.5px;color:#aaa;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="submitWd()"><i class="bi bi-send me-1"></i>Submit</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Approve WD Modal (Admin) -->
+<div class="modal fade" id="wdAppModal" tabindex="-1"><div class="modal-dialog modal-sm"><div class="modal-content">
+  <div class="modal-header"><h6 class="modal-title text-white"><i class="bi bi-check-circle me-2"></i>Withdrawal Action</h6><button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button></div>
+  <div class="modal-body text-center" style="padding:20px;">
+    <div style="font-size:34px;margin-bottom:8px;">💳</div>
+    <div id="wdapp-info" style="font-size:13px;margin-bottom:14px;"></div>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button id="wdapp-rej" class="bsm br2" style="padding:7px 14px;font-size:12.5px;">❌ Reject</button>
+      <button id="wdapp-app" class="bsm bg3" style="padding:7px 14px;font-size:12.5px;">✅ Approve</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- News Modal -->
+<div class="modal fade" id="newsModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-newspaper me-2"></i><span id="nm-t">Add News</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="nm-id">
+    <div class="mbf"><label class="fl2">Title *</label><input type="text" id="nm-title" class="fc2" placeholder="News title"></div>
+    <div class="mbf"><label class="fl2">Content *</label><textarea id="nm-content" class="fc2" rows="4" placeholder="Content..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 15px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="saveNews()"><i class="bi bi-check-circle me-1"></i><span id="nm-slbl">Save</span></button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Add/Edit Client Modal -->
+<div class="modal fade" id="clientModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-people me-2"></i><span id="cm-t">Add Client</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body"><input type="hidden" id="cm-id">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="mbf"><label class="fl2">Username * (6-15 chars, letters/numbers/_)</label><input type="text" id="cm-user" class="fc2" placeholder="min 6 chars"></div>
+        <div class="mbf"><label class="fl2">Password *</label><input type="password" id="cm-pass" class="fc2" placeholder="min 6 chars"></div>
+        <div class="mbf"><label class="fl2">Email</label><input type="email" id="cm-email" class="fc2" placeholder="email@example.com"></div>
+        <div class="mbf"><label class="fl2">Skype ID</label><input type="text" id="cm-skype" class="fc2" placeholder="Skype ID"></div>
+        <div class="mbf"><label class="fl2">Contact No.</label><input type="text" id="cm-contact" class="fc2" placeholder="441768499506"></div>
+      </div>
+      <div class="col-md-6">
+        <div class="mbf"><label class="fl2">Full Name</label><input type="text" id="cm-name" class="fc2" placeholder="Name"></div>
+        <div class="mbf"><label class="fl2">Company Name</label><input type="text" id="cm-company" class="fc2" placeholder="Company Name"></div>
+        <div class="mbf"><label class="fl2">Address</label><textarea id="cm-address" class="fc2" rows="2" placeholder="Address"></textarea></div>
+        <div class="mbf"><label class="fl2">Country</label>
+          <select id="cm-country" class="fc2">
+            <option value="">Select Country</option>
+            <option>Afghanistan</option><option>Albania</option><option>Algeria</option><option>Australia</option><option>Austria</option>
+            <option>Azerbaijan</option><option>Bahrain</option><option>Bangladesh</option><option>Belgium</option><option>Bolivia</option>
+            <option>Brazil</option><option>Bulgaria</option><option>Cambodia</option><option>Cameroon</option><option>Canada</option>
+            <option>Chile</option><option>China</option><option>Colombia</option><option>Croatia</option><option>Czech Republic</option>
+            <option>Denmark</option><option>Ecuador</option><option>Egypt</option><option>Ethiopia</option><option>Finland</option>
+            <option>France</option><option>Germany</option><option>Ghana</option><option>Greece</option><option>Hungary</option>
+            <option>India</option><option>Indonesia</option><option>Iran</option><option>Iraq</option><option>Ireland</option>
+            <option>Israel</option><option>Italy</option><option>Japan</option><option>Jordan</option><option>Kazakhstan</option>
+            <option>Kenya</option><option>Kuwait</option><option>Lebanon</option><option>Libya</option><option>Malaysia</option>
+            <option>Mali</option><option>Mexico</option><option>Morocco</option><option>Myanmar (Burma)</option><option>Nepal</option>
+            <option>Netherlands</option><option>New Zealand</option><option>Nigeria</option><option>Norway</option><option>Oman</option>
+            <option>Pakistan</option><option>Palestine</option><option>Peru</option><option>Philippines</option><option>Poland</option>
+            <option>Portugal</option><option>Qatar</option><option>Romania</option><option>Russia</option><option>Saudi Arabia</option>
+            <option>Senegal</option><option>Serbia</option><option>Singapore</option><option>South Africa</option><option>South Korea</option>
+            <option>Spain</option><option>Sri Lanka</option><option>Sudan</option><option>Sweden</option><option>Switzerland</option>
+            <option>Syria</option><option>Taiwan</option><option>Tanzania</option><option>Thailand</option><option>Tunisia</option>
+            <option>Turkey</option><option>Uganda</option><option>Ukraine</option><option>United Arab Emirates</option>
+            <option>United Kingdom</option><option>United States</option><option>Uzbekistan</option><option>Venezuela</option>
+            <option>Vietnam</option><option>Yemen</option><option>Zambia</option><option>Zimbabwe</option>
+          </select>
+        </div>
+        <div class="mbf"><label class="fl2">Status</label><select id="cm-status" class="fc2"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:8px 16px;font-family:inherit;cursor:pointer;font-size:13px;">Cancel</button>
+      <button class="btn-p" onclick="saveClient2()"><i class="bi bi-check-circle me-1"></i><span id="cm-slbl">Save Client</span></button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- View Client Modal -->
+<div class="modal fade" id="viewCliModal" tabindex="-1"><div class="modal-dialog modal-md"><div class="modal-content">
+  <div class="modal-header"><h5 class="modal-title"><i class="bi bi-person-circle me-2"></i>Client Details</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+  <div class="modal-body" id="view-cli-body" style="padding:22px;"></div>
+</div></div></div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="delModal" tabindex="-1"><div class="modal-dialog modal-sm"><div class="modal-content">
+  <div class="modal-header" style="background:linear-gradient(135deg,#be185d,#ef4444);"><h6 class="modal-title text-white"><i class="bi bi-trash me-2"></i>Delete</h6><button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1);"></button></div>
+  <div class="modal-body text-center" style="padding:20px;">
+    <div style="font-size:34px;margin-bottom:8px;">🗑️</div>
+    <p id="del-msg" style="font-size:13px;color:#555;margin-bottom:14px;"></p>
+    <div style="display:flex;gap:8px;justify-content:center;">
+      <button data-bs-dismiss="modal" style="background:#f3f4f6;border:none;border-radius:9px;padding:7px 14px;cursor:pointer;font-size:13px;">Cancel</button>
+      <button id="del-ok" class="btn-p" style="background:linear-gradient(135deg,#be185d,#ef4444);">Delete</button>
+    </div>
+  </div>
+</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/public/js/app.js"></script>
+</body></html>
