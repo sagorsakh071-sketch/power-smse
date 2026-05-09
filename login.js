@@ -6,9 +6,10 @@ const FB={apiKey:"AIzaSyDnwaq5pBCbmdIvKSSyQCQvxGxZZw7ikCI",authDomain:"power-sms
 const app=initializeApp(FB);const db=getFirestore(app);const auth=getAuth(app);
 
 let CAP=0;
-function initCap(){const a=Math.floor(Math.random()*9)+1,b=Math.floor(Math.random()*9)+1;CAP=a+b;document.getElementById('lcap').textContent=`${a} + ${b} = ?`;}
+function initCap(){const a=Math.floor(Math.random()*9)+1,b=Math.floor(Math.random()*9)+1;CAP=a+b;const el=document.getElementById('lcap');if(el)el.textContent=`${a} + ${b} = ?`;}
 function msg(id,txt,t='d'){const el=document.getElementById(id);if(!el)return;el.innerHTML=txt?`<div class="amsg ${t}">${txt}</div>`:'';}
-window.tEye=function(pi,ii){const p=document.getElementById(pi),i=document.getElementById(ii);p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'bi bi-eye-slash':'bi bi-eye';};
+
+window.tEye=function(pi,ii){const p=document.getElementById(pi),i=document.getElementById(ii);if(!p||!i)return;p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'bi bi-eye-slash':'bi bi-eye';};
 
 window.doLogin=async function(){
   const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value,c=parseInt(document.getElementById('lcans').value);
@@ -24,7 +25,6 @@ window.doLogin=async function(){
     const snap=await getDoc(doc(db,'users',firebaseUser.uid));
     if(!snap.exists()){await signOut(auth);msg('lmsg','Account not found!');initCap();document.getElementById('lcans').value='';btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     const ud=snap.data();
-    // ❌ Admin এই page থেকে ঢুকতে পারবে না
     if(ud.role==='admin'){await signOut(auth);msg('lmsg','Access denied!');initCap();document.getElementById('lcans').value='';btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     if(ud.status==='inactive'){await signOut(auth);msg('lmsg','Account is inactive!');btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     window.location.href='/dashboard';
@@ -32,12 +32,30 @@ window.doLogin=async function(){
   btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
 };
 
+// Init on load
+document.addEventListener('DOMContentLoaded',()=>{
+  initCap();
+  const lyr=document.getElementById('lyr');if(lyr)lyr.textContent=new Date().getFullYear();
+});
+
 onAuthStateChanged(auth,async(user)=>{
-  if(user){try{const snap=await getDoc(doc(db,'users',user.uid));if(snap.exists()&&snap.data().status==='active'&&snap.data().role!=='admin'){window.location.href='/dashboard';return;}else{await signOut(auth);}}catch(e){}}
-  try{const sSnap=await getDoc(doc(db,'settings','main'));if(!sSnap.exists()||!sSnap.data().setupDone){const uSnap=await getDocs(collection(db,'users'));if(uSnap.empty){window.location.href='/setup';return;}}}catch(e){}
+  if(user){
+    try{
+      const snap=await getDoc(doc(db,'users',user.uid));
+      if(snap.exists()&&snap.data().status==='active'&&snap.data().role!=='admin'){window.location.href='/dashboard';return;}
+      else{await signOut(auth);}
+    }catch(e){}
+  }
+  try{
+    const sSnap=await getDoc(doc(db,'settings','main'));
+    if(!sSnap.exists()||!sSnap.data().setupDone){
+      const uSnap=await getDocs(collection(db,'users'));
+      if(uSnap.empty){window.location.href='/setup';return;}
+    }
+  }catch(e){}
   const params=new URLSearchParams(window.location.search);
   const invId=params.get('invite');
   if(invId){window.location.href='/register?invite='+invId;return;}
   initCap();
-  document.getElementById('lyr').textContent=new Date().getFullYear();
+  const lyr=document.getElementById('lyr');if(lyr)lyr.textContent=new Date().getFullYear();
 });
