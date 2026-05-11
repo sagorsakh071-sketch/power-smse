@@ -5,40 +5,36 @@ import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https:
 const FB={apiKey:"AIzaSyDnwaq5pBCbmdIvKSSyQCQvxGxZZw7ikCI",authDomain:"power-sms-88a0d.firebaseapp.com",projectId:"power-sms-88a0d",storageBucket:"power-sms-88a0d.firebasestorage.app",messagingSenderId:"702990685390",appId:"1:702990685390:web:a5e50bcb83911ba2036c9f"};
 const app=initializeApp(FB);const db=getFirestore(app);const auth=getAuth(app);
 
+let CAP=0;
+function initCap(){const a=Math.floor(Math.random()*9)+1,b=Math.floor(Math.random()*9)+1;CAP=a+b;document.getElementById('lcap').textContent=`${a} + ${b} = ?`;}
 function msg(id,txt,t='d'){const el=document.getElementById(id);if(!el)return;el.innerHTML=txt?`<div class="amsg ${t}">${txt}</div>`:'';}
+window.tEye=function(pi,ii){const p=document.getElementById(pi),i=document.getElementById(ii);p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'bi bi-eye-slash':'bi bi-eye';};
 
 window.doLogin=async function(){
-  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value,c=parseInt(document.getElementById('lcans').value);
   msg('lmsg','');
   if(!u||!p){msg('lmsg','Username and Password are required');return;}
-  if(window.checkCap&&!window.checkCap()){
-    msg('lmsg','Wrong verification answer!');
-    if(window.resetCap)window.resetCap();return;
-  }
+  if(isNaN(c)||c!==CAP){msg('lmsg','Wrong answer!');initCap();document.getElementById('lcans').value='';return;}
   const btn=document.getElementById('lbtn');btn.disabled=true;btn.innerHTML='<span class="sp me-2"></span>Signing in...';
   try{
     const email=u.toLowerCase().replace(/[^a-z0-9]/g,'')+'@powersms.app';
     let firebaseUser;
     try{const cred=await signInWithEmailAndPassword(auth,email,p);firebaseUser=cred.user;}
-    catch(e){msg('lmsg','Username or Password is incorrect!');if(window.resetCap)window.resetCap();btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
+    catch(e){msg('lmsg','Username or Password is incorrect!');initCap();document.getElementById('lcans').value='';btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     const snap=await getDoc(doc(db,'users',firebaseUser.uid));
-    if(!snap.exists()){await signOut(auth);msg('lmsg','Access denied!');if(window.resetCap)window.resetCap();btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
+    if(!snap.exists()){await signOut(auth);msg('lmsg','Access denied!');initCap();document.getElementById('lcans').value='';btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     const ud=snap.data();
-    if(ud.role!=='admin'){await signOut(auth);msg('lmsg','Access denied!');if(window.resetCap)window.resetCap();btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
+    // ✅ শুধু Admin ঢুকতে পারবে
+    if(ud.role!=='admin'){await signOut(auth);msg('lmsg','Access denied!');initCap();document.getElementById('lcans').value='';btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     if(ud.status==='inactive'){await signOut(auth);msg('lmsg','Account is inactive!');btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';return;}
     msg('lmsg','✅ Login successful!','s');
     setTimeout(()=>{window.location.href='/dashboard';},1000);
-  }catch(e){msg('lmsg','Error: '+e.message);if(window.resetCap)window.resetCap();}
+  }catch(e){msg('lmsg','Error: '+e.message);initCap();document.getElementById('lcans').value='';}
   btn.disabled=false;btn.innerHTML='<i class="bi bi-box-arrow-in-right me-2"></i>Sign In';
 };
 
 onAuthStateChanged(auth,async(user)=>{
-  if(user){
-    try{
-      const snap=await getDoc(doc(db,'users',user.uid));
-      if(snap.exists()&&snap.data().status==='active'&&snap.data().role==='admin'){
-        window.location.href='/dashboard';return;
-      }else{await signOut(auth);}
-    }catch(e){}
-  }
+  if(user){try{const snap=await getDoc(doc(db,'users',user.uid));if(snap.exists()&&snap.data().status==='active'&&snap.data().role==='admin'){window.location.href='/dashboard';return;}else{await signOut(auth);}}catch(e){}}
+  initCap();
+  document.getElementById('lyr').textContent=new Date().getFullYear();
 });
