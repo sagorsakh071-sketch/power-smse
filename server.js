@@ -18,4 +18,4 @@ app.get('/register', (req,res) => res.sendFile(path.join(__dirname,'register.htm
 app.get('/dashboard', (req,res) => res.sendFile(path.join(__dirname,'dashboard.html')));
 app.use((req,res) => res.redirect('/login'));
 
-app.listen(PORT, () => console.log(`✅ Power SMS running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Power SMS running on port ${PORT}`));
