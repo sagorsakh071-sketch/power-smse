@@ -540,6 +540,20 @@ window.saveNumbers=async function(){
 
 window.delNum=async function(id){await deleteDoc(doc(db,'sms_numbers',id));toast('Deleted!');loadAdminNums();}
 
+window.bulkDelNums=async function(){
+  const checked=[...document.querySelectorAll('.num-chk:checked')].map(c=>c.value);
+  if(!checked.length){toast('কোনো number select করুন!','w');return;}
+  if(!confirm(`${checked.length} টা number delete করবেন?`))return;
+  try{
+    for(const id of checked) await deleteDoc(doc(db,'sms_numbers',id));
+    toast(`✅ ${checked.length} numbers deleted!`);loadAdminNums();
+  }catch(e){toast('Error: '+e.message,'e');}
+};
+
+window.selectAllNums=function(chk){
+  document.querySelectorAll('.num-chk').forEach(c=>c.checked=chk.checked);
+};
+
 // ════════════════════════════
 // AGENT: MY NUMBERS
 // ════════════════════════════
@@ -1104,7 +1118,7 @@ function renderClients2(list){
   const tb=document.getElementById('clients2-tb');if(!tb)return;
   document.getElementById('clients2-cnt').textContent=`${list.length} records`;
   if(!list.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#bbb;padding:28px;">No clients yet</td></tr>';return;}
-  tb.innerHTML=list.map(async(c,i)=>`<tr>
+  tb.innerHTML=list.map((c,i)=>`<tr>
     <td style="color:#bbb;font-size:11px;">${i+1}</td>
     <td><strong>${c.username}</strong></td>
     <td style="font-size:12.5px;">${c.name||'-'}</td>
@@ -1118,10 +1132,9 @@ function renderClients2(list){
       <button class="bsm be" onclick="viewClient('${c.id}')" title="View"><i class="bi bi-eye"></i></button>
       <button class="bsm be" onclick="openEditClient('${c.id}')" title="Edit"><i class="bi bi-pencil"></i></button>
       <button class="bsm bo" onclick="toggleClientStatus('${c.id}','${c.status||'active'}')" title="Toggle"><i class="bi bi-toggle-on"></i></button>
-      <button class="bsm bd" onclick="confirmDel('Client &quot;${c.username}&quot; delete করবেন?',()=>delClient('${c.id}'))"><i class="bi bi-trash"></i></button>
+      <button class="bsm bd" onclick="confirmDel('Delete client?',()=>delClient('${c.id}'))"><i class="bi bi-trash"></i></button>
     </td>
   </tr>`).join('');
-  // Load number counts async
   list.forEach(async(c)=>{
     try{const ns=await getDocs(query(collection(db,'sms_numbers'),where('clientId','==',c.id)));const el=document.getElementById('cli-nums-'+c.id);if(el)el.textContent=ns.size;}catch(e){}
   });
