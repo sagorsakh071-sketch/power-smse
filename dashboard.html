@@ -215,7 +215,16 @@
       </div>
       <div class="tw">
         <div class="twh"><div class="tt">All Numbers</div><span id="anums-cnt" style="font-size:11.5px;color:#aaa;"></span></div>
-        <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Number</th><th>Range</th><th>Agent</th><th>Client</th><th>Status</th><th>Action</th></tr></thead><tbody id="anums-tb"><tr><td colspan="7" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div style="padding:10px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #f5f3ff;">
+          <span style="font-size:12px;color:#888;">Show:</span>
+          <select id="an-perpage" class="fc2" style="width:80px;padding:5px 8px;font-size:12px;" onchange="anPerPage()"><option value="25">25</option><option value="50">50</option><option value="100">100</option><option value="500">500</option><option value="1000">1000</option><option value="all">All</option></select>
+          <div class="sb2" style="width:180px;"><i class="bi bi-search"></i><input type="text" id="an-search" placeholder="Search..." oninput="anSearch()" style="font-size:12px;"></div>
+          <button class="bsm be" onclick="exportAnCSV()"><i class="bi bi-filetype-csv"></i> CSV</button>
+          <button class="bsm bg3" onclick="exportAnExcel()"><i class="bi bi-file-earmark-excel"></i> Excel</button>
+        </div>
+        <div style="overflow-x:auto;"><table><thead><tr><th><input type="checkbox" onchange="selectAllNums(this)"></th><th>#</th><th>Number</th><th>Range</th><th>Agent</th><th>Client</th><th>Status</th><th>Action</th></tr></thead><tbody id="anums-tb"><tr><td colspan="8" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div id="an-pg"></div>
+        <div style="padding:8px 14px;"><button class="bsm bd" onclick="bulkDelNums()"><i class="bi bi-trash me-1"></i>Delete Selected</button></div>
       </div>
     </div>
 
@@ -277,6 +286,7 @@
       <div class="ph"><div><h4><i class="bi bi-person-badge me-2" style="color:var(--p)"></i>Agents</h4><div class="bc">Admin / Agents</div></div></div>
       <div class="tw"><div class="twh"><div class="tt">All Agents</div></div>
         <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Username</th><th>Name</th><th>Clients</th><th>Numbers</th><th>Balance</th><th>Status</th><th>Action</th></tr></thead><tbody id="agents-tb"><tr><td colspan="8" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div id="ag-pg"></div>
       </div>
     </div>
 
@@ -484,6 +494,7 @@
         </div>
         <div style="overflow-x:auto;"><table><thead><tr><th>#</th><th>Username</th><th>Name</th><th>Company</th><th>Email</th><th>Contact</th><th>Country</th><th>Numbers</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="clients2-tb"><tr><td colspan="10" style="text-align:center;padding:30px;color:#bbb;">Loading...</td></tr></tbody></table></div>
+        <div id="cl2-pg"></div>
         <div class="twf"><span id="clients2-cnt">0 records</span><span>Power SMS</span></div>
       </div>
     </div>
