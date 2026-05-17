@@ -8,13 +8,17 @@ const app=initializeApp(FB);const db=getFirestore(app);const auth=getAuth(app);
 let INV_TOKEN=null,INV_ROLE='agent';
 function msg(id,txt,t='d'){const el=document.getElementById(id);if(!el)return;el.innerHTML=txt?`<div class="amsg ${t}">${txt}</div>`:'';}
 
-const params=new URLSearchParams(window.location.search);
-const invId=params.get('invite');
 if(invId){
   (async()=>{
     try{
       const invDoc=await getDoc(doc(db,'invite_links',invId));
-      if(invDoc.exists()&&invDoc.data().status==='active'&&invDoc.data().expiresAt?.toDate?.()>new Date()){
+      if(invDoc.exists()&&invDoc.data().status==='active'){
+        // Check expiry only if expiresAt exists
+        const expAt=invDoc.data().expiresAt?.toDate?.();
+        if(expAt&&expAt<new Date()){
+          msg('rmsg','This invite link has expired!');
+          document.getElementById('rform').style.display='none';return;
+        }
         INV_TOKEN=invId;INV_ROLE=invDoc.data().role||'agent';
         const badge=document.getElementById('reg-role-badge');
         if(INV_ROLE==='client'){badge.innerHTML='<i class="bi bi-person-fill me-1"></i>Client Registration';badge.style.background='#dbeafe';badge.style.color='#1e40af';}
