@@ -504,24 +504,53 @@ window.submitRequest=async function(){
 // ════════════════════════════
 // ADMIN: ALL NUMBERS
 // ════════════════════════════
+let AN_ALL=[],AN_PAGE=1,AN_PER=25,AN_SEARCH='';
+
 async function loadAdminNums(){
   const tb=document.getElementById('anums-tb');if(!tb)return;
-  tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:28px;"><div class="spp"></div></td></tr>';
+  tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;"><div class="spp"></div></td></tr>';
   try{
     const rangeF=document.getElementById('nf-range')?.value,statusF=document.getElementById('nf-status')?.value;
     let cons=[orderBy('createdAt','desc')];
     if(rangeF) cons=[where('rangeId','==',rangeF),...cons];
     if(statusF) cons=[where('status','==',statusF),...cons];
     const snap=await getDocs(query(collection(db,'sms_numbers'),...cons));
-    document.getElementById('anums-cnt').textContent=`${snap.size} numbers`;
-    if(!snap.empty){
-      tb.innerHTML=snap.docs.map((d,i)=>{
-        const n=d.data(),r=allRanges.find(x=>x.id===n.rangeId);
-        return`<tr><td style="color:#bbb;font-size:11px;">${i+1}</td><td style="font-family:monospace;font-size:12px;">${n.number}</td><td style="font-size:11.5px;">${r?.range||'-'}</td><td style="font-size:11.5px;color:#888;">${n.agentName||'-'}</td><td style="font-size:11.5px;color:#888;">${n.clientName||'-'}</td><td><span class="${n.status==='available'?'ba':n.status==='assigned'?'bb':'bi2'}">${n.status}</span></td><td><button class="bsm bd" onclick="confirmDel('Number delete Are you sure?',()=>delNum('${d.id}'))"><i class="bi bi-trash"></i></button></td></tr>`;
-      }).join('');
-    }else tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#bbb;padding:28px;">No numbers found</td></tr>';
-  }catch(e){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:28px;">Error</td></tr>';console.error(e);}
+    AN_ALL=snap.docs.map(d=>({id:d.id,...d.data()}));
+    AN_PAGE=1;renderAdminNums();
+  }catch(e){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:28px;">Error</td></tr>';console.error(e);}
 }
+
+function renderAdminNums(){
+  const tb=document.getElementById('anums-tb');if(!tb)return;
+  AN_PER=document.getElementById('an-perpage')?.value==='all'?'all':parseInt(document.getElementById('an-perpage')?.value||25);
+  AN_SEARCH=(document.getElementById('an-search')?.value||'').toLowerCase();
+  let filtered=AN_ALL.filter(n=>!AN_SEARCH||(n.number||'').toLowerCase().includes(AN_SEARCH)||(n.agentName||'').toLowerCase().includes(AN_SEARCH)||(n.clientName||'').toLowerCase().includes(AN_SEARCH));
+  const cnt=document.getElementById('anums-cnt');if(cnt)cnt.textContent=`${filtered.length} numbers`;
+  const start=AN_PER==='all'?0:(AN_PAGE-1)*AN_PER;
+  const page=AN_PER==='all'?filtered:filtered.slice(start,start+AN_PER);
+  if(!page.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#bbb;padding:28px;">No numbers found</td></tr>';const pg=document.getElementById('an-pg');if(pg)pg.innerHTML='';return;}
+  tb.innerHTML=page.map((n,i)=>{
+    const r=allRanges.find(x=>x.id===n.rangeId);
+    return`<tr>
+      <td><input type="checkbox" class="num-chk" value="${n.id}"></td>
+      <td style="color:#bbb;font-size:11px;">${start+i+1}</td>
+      <td style="font-family:monospace;font-size:12px;">${n.number}</td>
+      <td style="font-size:11.5px;">${r?.range||'-'}</td>
+      <td style="font-size:11.5px;color:#888;">${n.agentName||'-'}</td>
+      <td style="font-size:11.5px;color:#888;">${n.clientName||'-'}</td>
+      <td><span class="${n.status==='available'?'ba':n.status==='assigned'?'bb':'bi2'}">${n.status}</span></td>
+      <td><button class="bsm bd" onclick="confirmDel('Delete number?',()=>delNum('${n.id}'))"><i class="bi bi-trash"></i></button></td>
+    </tr>`;
+  }).join('');
+  pgRender('an-pg',filtered.length,AN_PAGE,AN_PER,'goAnPage');
+}
+
+window.goAnPage=function(p){AN_PAGE=p;renderAdminNums();};
+window.anSearch=function(){AN_PAGE=1;renderAdminNums();};
+window.anPerPage=function(){AN_PAGE=1;renderAdminNums();};
+window.exportAnCSV=function(){exportCSV(AN_ALL.map(n=>({Number:n.number,Range:allRanges.find(x=>x.id===n.rangeId)?.range||'-',Agent:n.agentName||'-',Client:n.clientName||'-',Status:n.status})),'numbers');};
+window.exportAnExcel=function(){exportExcel(AN_ALL.map(n=>({Number:n.number,Range:allRanges.find(x=>x.id===n.rangeId)?.range||'-',Agent:n.agentName||'-',Client:n.clientName||'-',Status:n.status})),'numbers');};
+
 
 window.openAddNums=function(){document.getElementById('an-nums').value='';new bootstrap.Modal(document.getElementById('addNumModal')).show();};
 
@@ -705,22 +734,46 @@ async function loadCliNums(){
 // ════════════════════════════
 // AGENTS (Admin)
 // ════════════════════════════
+let AG_ALL=[],AG_PAGE=1,AG_PER=25;
+
 async function loadAgents(){
   const tb=document.getElementById('agents-tb');if(!tb)return;
   tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;"><div class="spp"></div></td></tr>';
   try{
     const snap=await getDocs(query(collection(db,'users'),where('role','==','agent')));
-    if(snap.empty){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#bbb;padding:28px;">No agents yet</td></tr>';return;}
     const sorted=snap.docs.slice().sort((a,b)=>(b.data().createdAt?.seconds||0)-(a.data().createdAt?.seconds||0));
-    const rows=await Promise.all(sorted.map(async(d,i)=>{
+    const rows=await Promise.all(sorted.map(async(d)=>{
       const ag=d.data();
       const [numSnap,cliSnapAll]=await Promise.all([getDocs(query(collection(db,'sms_numbers'),where('agentId','==',d.id))),getDocs(query(collection(db,'users'),where('agentId','==',d.id)))]);
-      const cliSnap={size:cliSnapAll.docs.filter(x=>x.data().role==='client').length};
-      return`<tr><td style="color:#bbb;font-size:11px;">${i+1}</td><td><strong>${ag.username}</strong></td><td style="font-size:12.5px;">${ag.name||'-'}</td><td style="font-size:12.5px;">${cliSnap.size}</td><td style="font-size:12.5px;">${numSnap.size}</td><td style="font-size:12.5px;font-weight:600;color:var(--p);">৳${(ag.balance||0).toFixed(2)}</td><td><span class="${ag.status==='active'?'ba':'bi2'}">${ag.status||'active'}</span></td><td><button class="bsm be" onclick="openAgNums('${d.id}','${ag.username}')" title="Assign Numbers"><i class="bi bi-plus-circle"></i></button><button class="bsm bo" onclick="toggleAgent('${d.id}','${ag.status||'active'}')" title="Toggle"><i class="bi bi-toggle-on"></i></button><button class="bsm bd" onclick="confirmDel('Agent delete Are you sure?',()=>delAgent('${d.id}'))"><i class="bi bi-trash"></i></button></td></tr>`;
+      return{id:d.id,username:ag.username,name:ag.name||'-',clients:cliSnapAll.docs.filter(x=>x.data().role==='client').length,numbers:numSnap.size,balance:(ag.balance||0).toFixed(2),status:ag.status||'active'};
     }));
-    tb.innerHTML=rows.join('');
+    AG_ALL=rows;AG_PAGE=1;renderAgents();
   }catch(e){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#ef4444;padding:28px;">Error</td></tr>';console.error(e);}
 }
+
+function renderAgents(){
+  const tb=document.getElementById('agents-tb');if(!tb)return;
+  const start=AG_PER==='all'?0:(AG_PAGE-1)*AG_PER;
+  const page=AG_PER==='all'?AG_ALL:AG_ALL.slice(start,start+AG_PER);
+  if(!page.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:#bbb;padding:28px;">No agents yet</td></tr>';const pg=document.getElementById('ag-pg');if(pg)pg.innerHTML='';return;}
+  tb.innerHTML=page.map((ag,i)=>`<tr>
+    <td style="color:#bbb;font-size:11px;">${start+i+1}</td>
+    <td><strong>${ag.username}</strong></td>
+    <td style="font-size:12.5px;">${ag.name}</td>
+    <td style="font-size:12.5px;">${ag.clients}</td>
+    <td style="font-size:12.5px;">${ag.numbers}</td>
+    <td style="font-size:12.5px;font-weight:600;color:var(--p);">৳${ag.balance}</td>
+    <td><span class="${ag.status==='active'?'ba':'bi2'}">${ag.status}</span></td>
+    <td>
+      <button class="bsm be" onclick="openAgNums('${ag.id}','${ag.username}')" title="Assign"><i class="bi bi-plus-circle"></i></button>
+      <button class="bsm bo" onclick="toggleAgent('${ag.id}','${ag.status}')" title="Toggle"><i class="bi bi-toggle-on"></i></button>
+      <button class="bsm bd" onclick="confirmDel('Delete agent?',()=>delAgent('${ag.id}'))"><i class="bi bi-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  pgRender('ag-pg',AG_ALL.length,AG_PAGE,AG_PER,'goAgPage');
+}
+
+window.goAgPage=function(p){AG_PAGE=p;renderAgents();};
 
 window.openAgNums=function(uid,un){
   document.getElementById('agn-uid').value=uid;document.getElementById('agn-uname').value=un;document.getElementById('agn-qty').value='';document.getElementById('agn-avail').textContent='';
@@ -822,12 +875,21 @@ async function loadInvites(){
 
 window.genInvite=async function(role){
   try{
-    const exp=new Date();exp.setHours(exp.getHours()+24);
-    const ref=await addDoc(collection(db,'invite_links'),{role,agentId:null,status:'active',createdAt:Timestamp.now(),expiresAt:Timestamp.fromDate(exp),usedBy:null});
-    const baseUrl=SETT.siteUrl||(window.location.origin+window.location.pathname.replace(/\/$/,''));
-    const link=baseUrl+'?invite='+ref.id;
-    await navigator.clipboard.writeText(link);
-    toast(`✅ New ${role} invite link created & copied!`);loadInvites();
+    const exp=new Date();exp.setHours(exp.getHours()+168); // 7 days
+    const ref=await addDoc(collection(db,'invite_links'),{role,agentId:CU.id,agentName:CU.username,status:'active',createdAt:Timestamp.now(),expiresAt:Timestamp.fromDate(exp),usedBy:null});
+    const baseUrl=window.location.origin;
+    const link=baseUrl+'/register?invite='+ref.id;
+    try{await navigator.clipboard.writeText(link);}catch(e){}
+    // Show link in toast
+    toast(`✅ ${role} invite link created!`);
+    // Show link in alert
+    setTimeout(()=>{
+      const div=document.createElement('div');
+      div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:20px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.3);z-index:9999;max-width:90%;width:400px;';
+      div.innerHTML=`<div style="font-weight:700;margin-bottom:10px;">✅ Invite Link Created</div><div style="background:#f0ecff;border-radius:8px;padding:10px;font-size:12px;word-break:break-all;color:#4a1f8c;margin-bottom:12px;">${link}</div><div style="display:flex;gap:8px;"><button onclick="navigator.clipboard.writeText('${link}');this.textContent='✅ Copied!'" style="flex:1;background:linear-gradient(135deg,#4a1f8c,#6f42c1);color:#fff;border:none;border-radius:8px;padding:8px;cursor:pointer;">📋 Copy Link</button><button onclick="this.closest('div[style]').remove()" style="flex:1;background:#f3f4f6;border:none;border-radius:8px;padding:8px;cursor:pointer;">Close</button></div>`;
+      document.body.appendChild(div);
+    },300);
+    loadInvites();
   }catch(e){toast('Error: '+e.message,'e');}
 };
 window.delInvite=async function(id){await deleteDoc(doc(db,'invite_links',id));toast('Deleted!');loadInvites();};
@@ -1114,12 +1176,23 @@ async function loadClients2(){
   }catch(e){if(tb)tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#ef4444;padding:28px;">Error loading clients</td></tr>';console.error(e);}
 }
 
+let CL2_ALL=[],CL2_PAGE=1,CL2_PER=25;
+
 function renderClients2(list){
+  CL2_ALL=list;
+  renderClients2Page();
+}
+
+function renderClients2Page(){
   const tb=document.getElementById('clients2-tb');if(!tb)return;
-  document.getElementById('clients2-cnt').textContent=`${list.length} records`;
-  if(!list.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#bbb;padding:28px;">No clients yet</td></tr>';return;}
-  tb.innerHTML=list.map((c,i)=>`<tr>
-    <td style="color:#bbb;font-size:11px;">${i+1}</td>
+  const q=(document.getElementById('cli-q')?.value||'').toLowerCase();
+  let filtered=CL2_ALL.filter(c=>!q||(c.username||'').toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)||(c.company||'').toLowerCase().includes(q));
+  const cnt=document.getElementById('clients2-cnt');if(cnt)cnt.textContent=`${filtered.length} records`;
+  const start=CL2_PER==='all'?0:(CL2_PAGE-1)*CL2_PER;
+  const page=CL2_PER==='all'?filtered:filtered.slice(start,start+CL2_PER);
+  if(!page.length){tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#bbb;padding:28px;">No clients yet</td></tr>';const pg=document.getElementById('cl2-pg');if(pg)pg.innerHTML='';return;}
+  tb.innerHTML=page.map((c,i)=>`<tr>
+    <td style="color:#bbb;font-size:11px;">${start+i+1}</td>
     <td><strong>${c.username}</strong></td>
     <td style="font-size:12.5px;">${c.name||'-'}</td>
     <td style="font-size:12px;">${c.company||'-'}</td>
@@ -1135,12 +1208,14 @@ function renderClients2(list){
       <button class="bsm bd" onclick="confirmDel('Delete client?',()=>delClient('${c.id}'))"><i class="bi bi-trash"></i></button>
     </td>
   </tr>`).join('');
-  list.forEach(async(c)=>{
+  page.forEach(async(c)=>{
     try{const ns=await getDocs(query(collection(db,'sms_numbers'),where('clientId','==',c.id)));const el=document.getElementById('cli-nums-'+c.id);if(el)el.textContent=ns.size;}catch(e){}
   });
+  pgRender('cl2-pg',filtered.length,CL2_PAGE,CL2_PER,'goCl2Page');
 }
 
-window.filterClients=function(){const q=document.getElementById('cli-q')?.value.toLowerCase();renderClients2(q?allClients2.filter(c=>(c.username||'').toLowerCase().includes(q)||(c.name||'').toLowerCase().includes(q)||(c.company||'').toLowerCase().includes(q)):allClients2);};
+window.goCl2Page=function(p){CL2_PAGE=p;renderClients2Page();};
+window.filterClients=function(){CL2_PAGE=1;renderClients2Page();};
 
 window.openAddClient2=function(){
   document.getElementById('cm-id').value='';document.getElementById('cm-t').textContent='Add Client';document.getElementById('cm-slbl').textContent='Save Client';
